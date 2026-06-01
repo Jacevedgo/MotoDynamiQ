@@ -9,6 +9,7 @@ require_once('../modelos/motocicletas.php');
 
 // Recibir parámetro de control
 $control = $_GET['control'];
+$vec = []; //Inicializamos con un arreglo vacío por seguridad
 
 $mon = new Motocicletas($conexion);
 
@@ -44,8 +45,18 @@ switch ($control) {
     break;
 
 }
-      $datosj = json_encode($vec);
-      echo $datosj;
-      header('Content-Type: application/json');
+// ... (dentro de tu switch, el código se mantiene igual)
+
+// 1. Codificamos a JSON primero
+$datosj = json_encode($vec);
+
+// 2. Enviamos el encabezado ANTES de imprimir cualquier cosa
+header('Content-Type: application/json');
+
+// 3. Imprimimos el JSON
+echo $datosj;
+
+// Asegúrate de que no haya NADA más después de esto, 
+// ni siquiera espacios o saltos de línea fuera de las etiquetas <?php
 
 ?>

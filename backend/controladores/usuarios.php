@@ -18,7 +18,7 @@ switch ($control) {
         break;
     
     case 'insertar':
-    $json = '{"nombre":"Ricardo Jorge","usuario":"Richi","contrasena":"12345789","rol":"Administrador"}';
+    $json = file_get_contents('php://input'); // Leemos el JSON real que envía Angular desde el formulario
     $params = json_decode($json);
     $vec = $usu->insertar($params);
     break;
@@ -30,7 +30,8 @@ switch ($control) {
 
     case 'editar':
     $id = $_GET['id'] ?? 0;
-    $json = '{"nombre":"Carlos Gutierrez","usuario":"Carlangas","contrasena":"1234579","rol":"Vendedor"}';
+    // Capturamos lo que Angular realmente envía
+    $json = file_get_contents('php://input'); 
     $params = json_decode($json);
     $vec = $usu->editar($id, $params);
     break;

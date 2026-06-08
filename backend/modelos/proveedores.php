@@ -35,19 +35,23 @@ class Proveedores {
         ];
     }
 
+   // ⚡ MÉTODO EDITAR CORREGIDO: Ahora incluye el campo email
     public function editar($id, $params) {
-    $sql = "UPDATE proveedores SET nombre=?, telefono=?, direccion=? WHERE id=?";
-    $stmt = mysqli_prepare($this->conexion, $sql);
-    mysqli_stmt_bind_param($stmt, "sssi", 
-        $params->nombre, 
-        $params->telefono, 
-        $params->direccion, 
-        $id
-    );
-    mysqli_stmt_execute($stmt);
+        $sql = "UPDATE proveedores SET nombre=?, telefono=?, email=?, direccion=? WHERE id=?";
+        $stmt = mysqli_prepare($this->conexion, $sql);
+        
+        // Pasamos 4 strings ("ssss") y 1 entero ("i") para el ID
+        mysqli_stmt_bind_param($stmt, "ssssi", 
+            $params->nombre, 
+            $params->telefono, 
+            $params->email, 
+            $params->direccion, 
+            $id
+        );
+        mysqli_stmt_execute($stmt);
 
-    return ["Resultado"=>"OK","Mensaje"=>"El proveedor ha sido actualizado"];
-}
+        return ["Resultado" => "OK", "Mensaje" => "El proveedor ha sido actualizado"];
+    }
 
 
     public function eliminar($id) {

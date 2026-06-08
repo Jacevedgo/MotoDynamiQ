@@ -23,22 +23,26 @@ class Usuarios {
     }
 
     public function insertar($params) {
-    if (empty($params->nombre) || empty($params->usuario) || empty($params->contrasena)) {
-        return ["Resultado"=>"ERROR","Mensaje"=>"Todos los campos son obligatorios"];
+    // 🔍 Cambiamos $params->contrasena por $params->rol
+    if (empty($params->nombre) || empty($params->usuario) || empty($params->rol)) {
+        return ["Resultado" => "ERROR", "Mensaje" => "Todos los campos son obligatorios"];
     }
+
+    // Por ahora, pasamos un valor por defecto para la contraseña en la base de datos
+    $contrasenaDefecto = "123456"; 
 
     $sql = "INSERT INTO usuarios (nombre, usuario, contrasena, rol) VALUES (?, ?, ?, ?)";
     $stmt = mysqli_prepare($this->conexion, $sql);
     mysqli_stmt_bind_param($stmt, "ssss", 
         $params->nombre, 
         $params->usuario, 
-        $params->contrasena, 
+        $contrasenaDefecto, // 🔑 Usamos la contraseña por defecto
         $params->rol
     );
     mysqli_stmt_execute($stmt);
 
-    return ["Resultado"=>"OK","Mensaje"=>"Usuario registrado"];
-  }
+    return ["Resultado" => "OK", "Mensaje" => "Usuario registrado"];
+}
 
     public function editar($id, $params) {
     // Verificar si el usuario ya existe con otro ID
@@ -66,20 +70,6 @@ class Usuarios {
 
     return ["Resultado"=>"OK","Mensaje"=>"El usuario ha sido actualizado"];
 }
-
-
-    // Eliminar usuario
-    // public function eliminar($id) {
-    //     $sql = "DELETE FROM usuarios WHERE id = ?";
-    //     $stmt = mysqli_prepare($this->conexion, $sql);
-    //     mysqli_stmt_bind_param($stmt, "i", $id);
-    //     mysqli_stmt_execute($stmt);
-
-    //     return [
-    //         "Resultado" => "OK",
-    //         "Mensaje" => "El usuario ha sido eliminado"
-    //     ];
-    // }
 
     public function eliminar($id) {
     $sql = "DELETE FROM usuarios WHERE id = ?";

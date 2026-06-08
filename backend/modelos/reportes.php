@@ -31,12 +31,13 @@ class Reportes {
         return ["Resultado"=>"ERROR","Mensaje"=>"El título es obligatorio"];
     }
 
-    $sql = "INSERT INTO reportes (titulo, descripcion, fecha) VALUES (?, ?, ?)";
+    $sql = $sql = "INSERT INTO reportes (titulo, descripcion, fecha, usuario_id) VALUES (?, ?, ?, ?)";
     $stmt = mysqli_prepare($this->conexion, $sql);
-    mysqli_stmt_bind_param($stmt, "sss", 
+    mysqli_stmt_bind_param($stmt, "sssi", 
         $params->titulo, 
         $params->descripcion, 
-        $params->fecha
+        $params->fecha,
+        $params->usuario_id
     );
     mysqli_stmt_execute($stmt);
 

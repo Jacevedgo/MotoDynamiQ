@@ -68,16 +68,30 @@ class Ventas {
 
     // Eliminar venta
     public function eliminar($id) {
-        $sql = "DELETE FROM ventas WHERE id = ?";
-        $stmt = mysqli_prepare($this->conexion, $sql);
-        mysqli_stmt_bind_param($stmt, "i", $id);
-        mysqli_stmt_execute($stmt);
+    mysqli_begin_transaction($this->conexion);
+    try {
+        // 1. Opcional: Aquí deberías recuperar el stock y sumarlo a motocicletas
+        // ... (lógica de UPDATE a stock) ...
 
-        return [
-            "Resultado" => "OK",
-            "Mensaje" => "La venta ha sido eliminada"
-        ];
+        // 2. Primero borramos los hijos (detalle_ventas)
+        $sqlDelDetalles = "DELETE FROM detalle_ventas WHERE venta_id = ?";
+        $stmt1 = mysqli_prepare($this->conexion, $sqlDelDetalles);
+        mysqli_stmt_bind_param($stmt1, "i", $id);
+        mysqli_stmt_execute($stmt1);
+
+        // 3. Luego borramos el padre (ventas)
+        $sqlDelVenta = "DELETE FROM ventas WHERE id = ?";
+        $stmt2 = mysqli_prepare($this->conexion, $sqlDelVenta);
+        mysqli_stmt_bind_param($stmt2, "i", $id);
+        mysqli_stmt_execute($stmt2);
+
+        mysqli_commit($this->conexion); // Todo salió bien
+        return ["Resultado" => "OK", "Mensaje" => "Venta eliminada correctamente"];
+    } catch (Exception $e) {
+        mysqli_rollback($this->conexion); // Algo falló, revertimos todo
+        return ["Resultado" => "ERROR", "Mensaje" => "Error: " . $e->getMessage()];
     }
+}
 
     // Filtrar ventas por cliente
     public function filtro($valor) {

@@ -49,16 +49,12 @@ switch ($control) {
         $vec = $mon->filtro($dato);
         break;
 
-    // 🏷️ CASO EXTRA: Para cargar dinámicamente el select de categorías en el formulario
-    case 'categorias':
-        $sql = "SELECT id_categoria AS id, nombre FROM categoria ORDER BY nombre";
-        $res = mysqli_query($conexion, $sql);
-        while ($row = mysqli_fetch_assoc($res)) {
-            $vec[] = $row;
-        }
+        case 'categorias':
+        $vec = $mon->obtenerCategorias();
         break;
-}
 
+        
+}
 // Renderizar la respuesta final al frontend
 echo json_encode($vec);
 ?>

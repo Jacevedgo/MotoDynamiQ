@@ -1,49 +1,53 @@
 <?php
-// Encabezados para CORS y JSON
+// 1. Configuración de errores para evitar que advertencias rompan el JSON
+error_reporting(0);
+ini_set('display_errors', 0);
+
+// 2. Encabezados definidos ANTES de cualquier salida
 header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept');
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=utf-8');
 
 require_once('../modelos/conexion.php');
 require_once('../modelos/usuarios.php');
 
-// Recibir parámetro de control
-$control = $_GET['control'];
+// Manejo de petición OPTIONS (pre-flight de Angular)
+if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+    exit;
+}
 
+$control = $_GET['control'] ?? '';
 $usu = new Usuarios($conexion);
+$vec = [];
+
+// Captura de datos JSON para peticiones POST
+$json = file_get_contents('php://input');
+$params = json_decode($json);
 
 switch ($control) {
     case 'consulta':
         $vec = $usu->consulta();
         break;
-    
     case 'insertar':
-    $json = file_get_contents('php://input'); // Leemos el JSON real que envía Angular desde el formulario
-    $params = json_decode($json);
-    $vec = $usu->insertar($params);
-    break;
-
+        $vec = $usu->insertar($params);
+        break;
     case 'eliminar':
-      $id = $_GET['id'];
-      $vec = $usu->eliminar($id);
-      break;
-
+        $id = $_GET['id'] ?? 0;
+        $vec = $usu->eliminar($id);
+        break;
     case 'editar':
-    $id = $_GET['id'] ?? 0;
-    // Capturamos lo que Angular realmente envía
-    $json = file_get_contents('php://input'); 
-    $params = json_decode($json);
-    $vec = $usu->editar($id, $params);
-    break;
-
+        $id = $_GET['id'] ?? 0;
+        $vec = $usu->editar($id, $params);
+        break;
     case 'filtro':
-    $dato = $_GET['dato'] ?? '';
-    $vec = $usu->filtro($dato);
-    break;
-
+        $dato = $_GET['dato'] ?? '';
+        $vec = $usu->filtro($dato);
+        break;
+    default:
+        $vec = ["Resultado" => "ERROR", "Mensaje" => "Control no definido"];
 }
-      $datosj = json_encode($vec);
-      echo $datosj;
-      header('Content-Type: application/json');
 
+// 3. Imprimir el JSON una sola vez
+echo json_encode($vec);
 ?>

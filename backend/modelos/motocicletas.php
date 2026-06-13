@@ -10,7 +10,7 @@ class Motocicletas {
     public function consulta() {
         $sql = "SELECT m.id, m.marca, m.modelo, m.cilindraje, m.precio, m.stock, c.nombre AS categoria
                 FROM motocicletas m
-                INNER JOIN categoria c ON m.fo_categoria = c.id_categoria
+                INNER JOIN categorias c ON m.fo_categoria = c.id_categoria
                 ORDER BY m.marca";
         $res = mysqli_query($this->conexion, $sql);
 
@@ -37,7 +37,8 @@ class Motocicletas {
         
         // s = string, i = entero, d = double (decimal)
         // marca(s), modelo(s), fo_categoria(i), cilindraje(i), precio(d), stock(i) -> "ssiidi"
-        mysqli_stmt_bind_param($stmt, "ssiidi", 
+        mysqli_stmt_bind_param($stmt, "issiidi", 
+            $id,
             $params->marca, 
             $params->modelo, 
             $params->fo_categoria, 
@@ -93,7 +94,7 @@ class Motocicletas {
     public function filtro($valor) {
         $sql = "SELECT m.id, m.marca, m.modelo, m.cilindraje, m.precio, m.stock, c.nombre AS categoria
                 FROM motocicletas m
-                INNER JOIN categoria c ON m.fo_categoria = c.id_categoria
+                INNER JOIN categorias c ON m.fo_categoria = c.id_categoria
                 WHERE m.marca LIKE ? OR m.modelo LIKE ?
                 ORDER BY m.marca";
         $stmt = mysqli_prepare($this->conexion, $sql);
@@ -108,5 +109,17 @@ class Motocicletas {
         }
         return $vec;
     }
+
+    // Nuevo método para obtener categorías
+public function obtenerCategorias() {
+    $sql = "SELECT id_categoria, nombre FROM categorias ORDER BY nombre";
+    $res = mysqli_query($this->conexion, $sql);
+    
+    $vec = [];
+    while ($row = mysqli_fetch_assoc($res)) {
+        $vec[] = $row;
+    }
+    return $vec;
+}
 }
 ?>

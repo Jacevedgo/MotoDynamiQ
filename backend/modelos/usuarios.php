@@ -6,15 +6,9 @@ class Usuarios {
         $this->conexion = $conexion;
     }
 
-    // Consultar todos los usuarios
     public function consulta() {
-        $sql = "SELECT id, nombre, usuario, rol FROM usuarios ORDER BY nombre";
+        $sql = "SELECT id, nombre_completo, nombre_usuario, rol FROM usuarios";
         $res = mysqli_query($this->conexion, $sql);
-
-        if (!$res) {
-            die("Error en consulta: " . mysqli_error($this->conexion));
-        }
-
         $vec = [];
         while ($row = mysqli_fetch_assoc($res)) {
             $vec[] = $row;
@@ -23,77 +17,56 @@ class Usuarios {
     }
 
     public function insertar($params) {
-    // 🔍 Cambiamos $params->contrasena por $params->rol
-    if (empty($params->nombre) || empty($params->usuario) || empty($params->rol)) {
-        return ["Resultado" => "ERROR", "Mensaje" => "Todos los campos son obligatorios"];
+        // Usamos los nombres reales de las propiedades que Angular debe enviar
+        if (empty($params->nombre_completo) || empty($params->nombre_usuario) || empty($params->rol)) {
+            return ["Resultado" => "ERROR", "Mensaje" => "Nombre, usuario y rol son obligatorios"];
+        }
+
+        $passwordDefecto = "123456"; 
+        $sql = "INSERT INTO usuarios (nombre_completo, nombre_usuario, password, rol) VALUES (?, ?, ?, ?)";
+        $stmt = mysqli_prepare($this->conexion, $sql);
+        mysqli_stmt_bind_param($stmt, "ssss", 
+            $params->nombre_completo, 
+            $params->nombre_usuario, 
+            $passwordDefecto,
+            $params->rol
+        );
+        mysqli_stmt_execute($stmt);
+
+        return ["Resultado" => "OK", "Mensaje" => "Usuario registrado"];
     }
-
-    // Por ahora, pasamos un valor por defecto para la contraseña en la base de datos
-    $contrasenaDefecto = "123456"; 
-
-    $sql = "INSERT INTO usuarios (nombre, usuario, contrasena, rol) VALUES (?, ?, ?, ?)";
-    $stmt = mysqli_prepare($this->conexion, $sql);
-    mysqli_stmt_bind_param($stmt, "ssss", 
-        $params->nombre, 
-        $params->usuario, 
-        $contrasenaDefecto, // 🔑 Usamos la contraseña por defecto
-        $params->rol
-    );
-    mysqli_stmt_execute($stmt);
-
-    return ["Resultado" => "OK", "Mensaje" => "Usuario registrado"];
-}
 
     public function editar($id, $params) {
-    // Verificar si el usuario ya existe con otro ID
-    $sqlCheck = "SELECT id FROM usuarios WHERE usuario = ? AND id != ?";
-    $stmtCheck = mysqli_prepare($this->conexion, $sqlCheck);
-    mysqli_stmt_bind_param($stmtCheck, "si", $params->usuario, $id);
-    mysqli_stmt_execute($stmtCheck);
-    $resCheck = mysqli_stmt_get_result($stmtCheck);
+        // Ajustamos la consulta UPDATE a los nombres reales
+        $sql = "UPDATE usuarios SET nombre_completo=?, nombre_usuario=?, password=?, rol=? WHERE id=?";
+        $stmt = mysqli_prepare($this->conexion, $sql);
+        mysqli_stmt_bind_param($stmt, "ssssi", 
+            $params->nombre_completo, 
+            $params->nombre_usuario, 
+            $params->password, 
+            $params->rol, 
+            $id
+        );
+        mysqli_stmt_execute($stmt);
 
-    if (mysqli_num_rows($resCheck) > 0) {
-        return ["Resultado"=>"ERROR","Mensaje"=>"El nombre de usuario ya está en uso"];
+        return ["Resultado"=>"OK","Mensaje"=>"El usuario ha sido actualizado"];
     }
-
-    // Si no hay duplicado, continuar con la actualización
-    $sql = "UPDATE usuarios SET nombre=?, usuario=?, contrasena=?, rol=? WHERE id=?";
-    $stmt = mysqli_prepare($this->conexion, $sql);
-    mysqli_stmt_bind_param($stmt, "ssssi", 
-        $params->nombre, 
-        $params->usuario, 
-        $params->contrasena, 
-        $params->rol, 
-        $id
-    );
-    mysqli_stmt_execute($stmt);
-
-    return ["Resultado"=>"OK","Mensaje"=>"El usuario ha sido actualizado"];
-}
 
     public function eliminar($id) {
-    $sql = "DELETE FROM usuarios WHERE id = ?";
-    $stmt = mysqli_prepare($this->conexion, $sql);
-    mysqli_stmt_bind_param($stmt, "i", $id);
-
-    try {
+        $sql = "DELETE FROM usuarios WHERE id = ?";
+        $stmt = mysqli_prepare($this->conexion, $sql);
+        mysqli_stmt_bind_param($stmt, "i", $id);
         mysqli_stmt_execute($stmt);
         return ["Resultado"=>"OK","Mensaje"=>"Usuario eliminado"];
-    } catch (mysqli_sql_exception $e) {
-        return ["Resultado"=>"ERROR","Mensaje"=>"No se puede eliminar el usuario porque tiene compras asociadas"];
     }
-  }
 
-
-    // Filtrar usuarios por nombre o usuario
     public function filtro($valor) {
-        $sql = "SELECT id, nombre, usuario, rol FROM usuarios WHERE nombre LIKE ? OR usuario LIKE ?";
+        $sql = "SELECT id, nombre_completo, nombre_usuario, rol FROM usuarios WHERE nombre_completo LIKE ? OR nombre_usuario LIKE ?";
         $stmt = mysqli_prepare($this->conexion, $sql);
         $like = "%$valor%";
         mysqli_stmt_bind_param($stmt, "ss", $like, $like);
         mysqli_stmt_execute($stmt);
         $res = mysqli_stmt_get_result($stmt);
-
         $vec = [];
         while ($row = mysqli_fetch_assoc($res)) {
             $vec[] = $row;

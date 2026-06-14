@@ -1,27 +1,15 @@
 <?php
-// 1. Configuración de errores para evitar que advertencias rompan el JSON
-error_reporting(0);
-ini_set('display_errors', 0);
-
-// 2. Encabezados definidos ANTES de cualquier salida
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept');
 header('Content-Type: application/json; charset=utf-8');
 
 require_once('../modelos/conexion.php');
 require_once('../modelos/usuarios.php');
 
-// Manejo de petición OPTIONS (pre-flight de Angular)
-if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-    exit;
-}
-
-$control = $_GET['control'] ?? '';
+$control = isset($_GET['control']) ? $_GET['control'] : '';
 $usu = new Usuarios($conexion);
 $vec = [];
 
-// Captura de datos JSON para peticiones POST
 $json = file_get_contents('php://input');
 $params = json_decode($json);
 
@@ -30,24 +18,24 @@ switch ($control) {
         $vec = $usu->consulta();
         break;
     case 'insertar':
-        $vec = $usu->insertar($params);
-        break;
-    case 'eliminar':
-        $id = $_GET['id'] ?? 0;
-        $vec = $usu->eliminar($id);
+        $vec = ($params) ? $usu->insertar($params) : ["Resultado" => "ERROR", "Mensaje" => "Datos vacíos"];
         break;
     case 'editar':
-        $id = $_GET['id'] ?? 0;
-        $vec = $usu->editar($id, $params);
+        $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+        $vec = ($params) ? $usu->editar($id, $params) : ["Resultado" => "ERROR", "Mensaje" => "Datos vacíos"];
+        break;
+    case 'eliminar':
+        $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+        $vec = $usu->eliminar($id);
         break;
     case 'filtro':
-        $dato = $_GET['dato'] ?? '';
+        $dato = isset($_GET['dato']) ? $_GET['dato'] : '';
         $vec = $usu->filtro($dato);
         break;
     default:
-        $vec = ["Resultado" => "ERROR", "Mensaje" => "Control no definido"];
+        $vec = ["Resultado" => "ERROR", "Mensaje" => "Acción no válida"];
+        break;
 }
 
-// 3. Imprimir el JSON una sola vez
 echo json_encode($vec);
 ?>

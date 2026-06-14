@@ -6,20 +6,10 @@ class Categoria {
         $this->conexion = $conexion;
     }
 
-    // Consultar motos con categoría y proveedor
     public function consulta() {
-        $sql = "SELECT DISTINCT m.marca, m.modelo, c.nombre AS categoria, pr.nombre AS proveedor
-                FROM motocicletas m
-                INNER JOIN categoria c ON m.fo_categoria = c.id_categoria
-                INNER JOIN detalle_compras dc ON m.id = dc.motocicleta_id
-                INNER JOIN compras co ON dc.compra_id = co.id
-                INNER JOIN proveedores pr ON co.proveedor_id = pr.id
-                ORDER BY m.marca";
+        $sql = "SELECT id_categoria, nombre FROM categorias ORDER BY nombre ASC";
         $res = mysqli_query($this->conexion, $sql);
-
-        if (!$res) {
-            die("Error en consulta: " . mysqli_error($this->conexion));
-        }
+        if (!$res) return ["Resultado" => "ERROR", "Mensaje" => mysqli_error($this->conexion)];
 
         $vec = [];
         while ($row = mysqli_fetch_assoc($res)) {
@@ -28,54 +18,55 @@ class Categoria {
         return $vec;
     }
 
-    // Eliminar categoría
-    public function eliminar($id) {
-        $sql = "DELETE FROM categoria WHERE id_categoria = ?";
-        $stmt = mysqli_prepare($this->conexion, $sql);
-        mysqli_stmt_bind_param($stmt, "i", $id);
-        mysqli_stmt_execute($stmt);
-
-        return [
-            "Resultado" => "OK",
-            "Mensaje" => "La categoría ha sido eliminada"
-        ];
-    }
-
-    // Insertar categoría
     public function insertar($params) {
-        $sql = "INSERT INTO categoria(nombre) VALUES (?)";
+        if (empty($params->nombre)) return ["Resultado" => "ERROR", "Mensaje" => "Nombre vacío"];
+        
+        $sql = "INSERT INTO categorias(nombre) VALUES (?)";
         $stmt = mysqli_prepare($this->conexion, $sql);
         mysqli_stmt_bind_param($stmt, "s", $params->nombre);
-        mysqli_stmt_execute($stmt);
-
-        return [
-            "Resultado" => "OK",
-            "Mensaje" => "La categoría ha sido insertada"
-        ];
+        
+        if (mysqli_stmt_execute($stmt)) {
+            return ["Resultado" => "OK", "Mensaje" => "Categoría insertada"];
+        } else {
+            return ["Resultado" => "ERROR", "Mensaje" => mysqli_stmt_error($stmt)];
+        }
     }
 
-    // Editar categoría
     public function editar($id, $params) {
-        $sql = "UPDATE categoria SET nombre = ? WHERE id_categoria = ?";
+        $sql = "UPDATE categorias SET nombre = ? WHERE id_categoria = ?";
         $stmt = mysqli_prepare($this->conexion, $sql);
         mysqli_stmt_bind_param($stmt, "si", $params->nombre, $id);
-        mysqli_stmt_execute($stmt);
-
-        return [
-            "Resultado" => "OK",
-            "Mensaje" => "La categoría ha sido actualizada"
-        ];
+        
+        if (mysqli_stmt_execute($stmt)) {
+            return ["Resultado" => "OK", "Mensaje" => "Categoría actualizada"];
+        } else {
+            return ["Resultado" => "ERROR", "Mensaje" => mysqli_stmt_error($stmt)];
+        }
     }
 
-    // Filtrar categorías por nombre
+    public function eliminar($id) {
+        $sql = "DELETE FROM categorias WHERE id_categoria = ?";
+        $stmt = mysqli_prepare($this->conexion, $sql);
+        mysqli_stmt_bind_param($stmt, "i", $id);
+        
+        if (mysqli_stmt_execute($stmt)) {
+            return ["Resultado" => "OK", "Mensaje" => "Categoría eliminada"];
+        } else {
+            if (mysqli_errno($this->conexion) == 1451) {
+                return ["Resultado" => "ERROR", "Mensaje" => "No se puede eliminar: tiene motos asociadas."];
+            }
+            return ["Resultado" => "ERROR", "Mensaje" => mysqli_error($this->conexion)];
+        }
+    }
+
     public function filtro($valor) {
-        $sql = "SELECT * FROM categoria WHERE nombre LIKE ?";
+        $sql = "SELECT id_categoria, nombre FROM categorias WHERE nombre LIKE ?";
         $stmt = mysqli_prepare($this->conexion, $sql);
         $like = "%$valor%";
         mysqli_stmt_bind_param($stmt, "s", $like);
         mysqli_stmt_execute($stmt);
         $res = mysqli_stmt_get_result($stmt);
-
+        
         $vec = [];
         while ($row = mysqli_fetch_assoc($res)) {
             $vec[] = $row;

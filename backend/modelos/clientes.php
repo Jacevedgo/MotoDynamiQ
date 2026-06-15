@@ -2,79 +2,45 @@
 class Clientes {
     private $conexion;
 
-    public function __construct($conexion) {
-        $this->conexion = $conexion;
-    }
+    public function __construct($conexion) { $this->conexion = $conexion; }
 
     public function consulta() {
-        $sql = "SELECT * FROM clientes ORDER BY nombre ASC";
-        $res = mysqli_query($this->conexion, $sql);
-        if (!$res) return ["Resultado" => "ERROR", "Mensaje" => mysqli_error($this->conexion)];
-        
+        $res = mysqli_query($this->conexion, "SELECT * FROM clientes ORDER BY nombre ASC");
         $vec = [];
         while ($row = mysqli_fetch_assoc($res)) { $vec[] = $row; }
         return $vec;
     }
 
     public function insertar($params) {
-        $sql = "INSERT INTO clientes(nombre, telefono, email, direccion) VALUES (?, ?, ?, ?)";
-        $stmt = mysqli_prepare($this->conexion, $sql);
-        
-        $nombre    = isset($params->nombre) ? trim($params->nombre) : '';
-        $telefono  = !empty($params->telefono) ? trim($params->telefono) : null;
-        $email     = !empty($params->email) ? trim($params->email) : null;
-        $direccion = !empty($params->direccion) ? trim($params->direccion) : 'No especificada';
-
-        mysqli_stmt_bind_param($stmt, "ssss", $nombre, $telefono, $email, $direccion);
-        
-        if (mysqli_stmt_execute($stmt)) {
-            return ["Resultado" => "OK", "Mensaje" => "Cliente insertado con éxito."];
-        } else {
-            return ["Resultado" => "ERROR", "Mensaje" => mysqli_stmt_error($stmt)];
-        }
+        $stmt = mysqli_prepare($this->conexion, "INSERT INTO clientes(nombre, telefono, email, direccion) VALUES (?, ?, ?, ?)");
+        mysqli_stmt_bind_param($stmt, "ssss", $params->nombre, $params->telefono, $params->email, $params->direccion);
+        return mysqli_stmt_execute($stmt) ? ["Resultado" => "OK", "Mensaje" => "Cliente insertado"] : ["Resultado" => "ERROR", "Mensaje" => mysqli_stmt_error($stmt)];
     }
 
     public function editar($id, $params) {
-        $sql = "UPDATE clientes SET nombre = ?, telefono = ?, email = ?, direccion = ? WHERE id = ?";
-        $stmt = mysqli_prepare($this->conexion, $sql);
-        
-        $nombre    = isset($params->nombre) ? trim($params->nombre) : '';
-        $telefono  = !empty($params->telefono) ? trim($params->telefono) : null;
-        $email     = !empty($params->email) ? trim($params->email) : null;
-        $direccion = !empty($params->direccion) ? trim($params->direccion) : 'No especificada';
-
-        mysqli_stmt_bind_param($stmt, "ssssi", $nombre, $telefono, $email, $direccion, $id);
-        
-        if (mysqli_stmt_execute($stmt)) {
-            return ["Resultado" => "OK", "Mensaje" => "Cliente actualizado con éxito."];
-        } else {
-            return ["Resultado" => "ERROR", "Mensaje" => mysqli_stmt_error($stmt)];
-        }
+        $stmt = mysqli_prepare($this->conexion, "UPDATE clientes SET nombre = ?, telefono = ?, email = ?, direccion = ? WHERE id = ?");
+        mysqli_stmt_bind_param($stmt, "ssssi", $params->nombre, $params->telefono, $params->email, $params->direccion, $id);
+        return mysqli_stmt_execute($stmt) ? ["Resultado" => "OK", "Mensaje" => "Cliente actualizado"] : ["Resultado" => "ERROR", "Mensaje" => mysqli_stmt_error($stmt)];
     }
 
     public function eliminar($id) {
-        $sql = "DELETE FROM clientes WHERE id = ?";
-        $stmt = mysqli_prepare($this->conexion, $sql);
+        $stmt = mysqli_prepare($this->conexion, "DELETE FROM clientes WHERE id = ?");
         mysqli_stmt_bind_param($stmt, "i", $id);
-        
         if (mysqli_stmt_execute($stmt)) {
-            return ["Resultado" => "OK", "Mensaje" => "Cliente eliminado correctamente."];
+            return ["Resultado" => "OK", "Mensaje" => "Cliente eliminado"];
         } else {
-            if (mysqli_errno($this->conexion) == 1451) {
-                return ["Resultado" => "ERROR", "Mensaje" => "No se puede eliminar: tiene ventas registradas."];
-            }
-            return ["Resultado" => "ERROR", "Mensaje" => mysqli_error($this->conexion)];
+            return (mysqli_errno($this->conexion) == 1451) 
+                ? ["Resultado" => "ERROR", "Mensaje" => "No se puede eliminar: tiene ventas asociadas."]
+                : ["Resultado" => "ERROR", "Mensaje" => mysqli_error($this->conexion)];
         }
     }
 
     public function filtro($valor) {
-        $sql = "SELECT * FROM clientes WHERE nombre LIKE ? ORDER BY nombre ASC";
-        $stmt = mysqli_prepare($this->conexion, $sql);
+        $stmt = mysqli_prepare($this->conexion, "SELECT * FROM clientes WHERE nombre LIKE ? ORDER BY nombre ASC");
         $like = "%$valor%";
         mysqli_stmt_bind_param($stmt, "s", $like);
         mysqli_stmt_execute($stmt);
         $res = mysqli_stmt_get_result($stmt);
-        
         $vec = [];
         while ($row = mysqli_fetch_assoc($res)) { $vec[] = $row; }
         return $vec;

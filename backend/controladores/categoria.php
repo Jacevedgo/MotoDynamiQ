@@ -1,12 +1,19 @@
 <?php
+// Cabeceras CORS y de tipo JSON
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept');
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Content-Type: application/json; charset=utf-8');
+
+// Si es una petición OPTIONS, terminar aquí (soluciona problemas de preflight en Angular)
+if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+    exit;
+}
 
 require_once('../modelos/conexion.php');
 require_once('../modelos/categoria.php');
 
-$control = isset($_GET['control']) ? $_GET['control'] : '';
+$control = $_GET['control'] ?? '';
 $cate = new Categoria($conexion);
 $vec = [];
 
@@ -18,11 +25,11 @@ switch ($control) {
         $vec = $cate->consulta();
         break;
     case 'insertar':
-        $vec = ($params) ? $cate->insertar($params) : ["Resultado" => "ERROR", "Mensaje" => "Datos vacíos"];
+        $vec = ($params) ? $cate->insertar($params) : ["Resultado" => "ERROR", "Mensaje" => "Datos incompletos"];
         break;
     case 'editar':
         $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
-        $vec = ($params) ? $cate->editar($id, $params) : ["Resultado" => "ERROR", "Mensaje" => "Datos vacíos"];
+        $vec = ($params) ? $cate->editar($id, $params) : ["Resultado" => "ERROR", "Mensaje" => "Datos incompletos"];
         break;
     case 'eliminar':
         $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
@@ -33,10 +40,10 @@ switch ($control) {
         $vec = $cate->filtro($dato);
         break;
     default:
-        $vec = ["Resultado" => "ERROR", "Mensaje" => "Control no válido"];
+        $vec = ["Resultado" => "ERROR", "Mensaje" => "Acción no definida"];
         break;
 }
 
+// Salida única y limpia
 echo json_encode($vec);
 ?>
-    

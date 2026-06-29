@@ -1,104 +1,66 @@
 <?php
 class Usuarios {
     private $conexion;
+    public function __construct($conexion) { $this->conexion = $conexion; }
 
-    public function __construct($conexion) {
-        $this->conexion = $conexion;
-    }
-
-    // Consultar todos los usuarios
     public function consulta() {
-        $sql = "SELECT id, nombre, usuario, rol FROM usuarios ORDER BY nombre";
+        // Asegúrate de traer todas las columnas que el HTML espera mostrar
+        $sql = "SELECT id, nombre, identificacion AS usuario, 'Sin Rol' AS rol FROM usuarios ORDER BY nombre";
         $res = mysqli_query($this->conexion, $sql);
-
-        if (!$res) {
-            die("Error en consulta: " . mysqli_error($this->conexion));
-        }
-
         $vec = [];
-        while ($row = mysqli_fetch_assoc($res)) {
-            $vec[] = $row;
-        }
+        while ($row = mysqli_fetch_assoc($res)) { $vec[] = $row; }
         return $vec;
     }
 
     public function insertar($params) {
-    // 🔍 Cambiamos $params->contrasena por $params->rol
-    if (empty($params->nombre) || empty($params->usuario) || empty($params->rol)) {
-        return ["Resultado" => "ERROR", "Mensaje" => "Todos los campos son obligatorios"];
+        $sql = "INSERT INTO usuarios (nombre, identificacion, password) VALUES (?, ?, ?)";
+        $stmt = mysqli_prepare($this->conexion, $sql);
+        $pass = "123456"; // Password por defecto
+        mysqli_stmt_bind_param($stmt, "sss", $params->nombre, $params->usuario, $pass);
+        mysqli_stmt_execute($stmt);
+        return ["Resultado" => "OK", "Mensaje" => "Usuario registrado"];
     }
-
-    // Por ahora, pasamos un valor por defecto para la contraseña en la base de datos
-    $contrasenaDefecto = "123456"; 
-
-    $sql = "INSERT INTO usuarios (nombre, usuario, contrasena, rol) VALUES (?, ?, ?, ?)";
-    $stmt = mysqli_prepare($this->conexion, $sql);
-    mysqli_stmt_bind_param($stmt, "ssss", 
-        $params->nombre, 
-        $params->usuario, 
-        $contrasenaDefecto, // 🔑 Usamos la contraseña por defecto
-        $params->rol
-    );
-    mysqli_stmt_execute($stmt);
-
-    return ["Resultado" => "OK", "Mensaje" => "Usuario registrado"];
-}
 
     public function editar($id, $params) {
-    // Verificar si el usuario ya existe con otro ID
-    $sqlCheck = "SELECT id FROM usuarios WHERE usuario = ? AND id != ?";
-    $stmtCheck = mysqli_prepare($this->conexion, $sqlCheck);
-    mysqli_stmt_bind_param($stmtCheck, "si", $params->usuario, $id);
-    mysqli_stmt_execute($stmtCheck);
-    $resCheck = mysqli_stmt_get_result($stmtCheck);
-
-    if (mysqli_num_rows($resCheck) > 0) {
-        return ["Resultado"=>"ERROR","Mensaje"=>"El nombre de usuario ya está en uso"];
+        $sql = "UPDATE usuarios SET nombre = ?, identificacion = ? WHERE id = ?";
+        $stmt = mysqli_prepare($this->conexion, $sql);
+        mysqli_stmt_bind_param($stmt, "ssi", $params->nombre, $params->usuario, $id);
+        mysqli_stmt_execute($stmt);
+        return ["Resultado" => "OK", "Mensaje" => "Usuario actualizado"];
     }
-
-    // Si no hay duplicado, continuar con la actualización
-    $sql = "UPDATE usuarios SET nombre=?, usuario=?, contrasena=?, rol=? WHERE id=?";
-    $stmt = mysqli_prepare($this->conexion, $sql);
-    mysqli_stmt_bind_param($stmt, "ssssi", 
-        $params->nombre, 
-        $params->usuario, 
-        $params->contrasena, 
-        $params->rol, 
-        $id
-    );
-    mysqli_stmt_execute($stmt);
-
-    return ["Resultado"=>"OK","Mensaje"=>"El usuario ha sido actualizado"];
-}
 
     public function eliminar($id) {
-    $sql = "DELETE FROM usuarios WHERE id = ?";
-    $stmt = mysqli_prepare($this->conexion, $sql);
-    mysqli_stmt_bind_param($stmt, "i", $id);
-
-    try {
-        mysqli_stmt_execute($stmt);
-        return ["Resultado"=>"OK","Mensaje"=>"Usuario eliminado"];
-    } catch (mysqli_sql_exception $e) {
-        return ["Resultado"=>"ERROR","Mensaje"=>"No se puede eliminar el usuario porque tiene compras asociadas"];
-    }
-  }
-
-
-    // Filtrar usuarios por nombre o usuario
-    public function filtro($valor) {
-        $sql = "SELECT id, nombre, usuario, rol FROM usuarios WHERE nombre LIKE ? OR usuario LIKE ?";
+        $sql = "DELETE FROM usuarios WHERE id = ?";
         $stmt = mysqli_prepare($this->conexion, $sql);
-        $like = "%$valor%";
-        mysqli_stmt_bind_param($stmt, "ss", $like, $like);
+        mysqli_stmt_bind_param($stmt, "i", $id);
+        mysqli_stmt_execute($stmt);
+        return ["Resultado" => "OK", "Mensaje" => "Usuario eliminado"];
+    }
+
+    // AGREGA ESTE MÉTODO A TU CLASE Usuarios EN modelos/usuarios.php
+    public function login($params) {
+        // Validar que lleguen los datos correctos
+        if (empty($params->identificacion) || empty($params->password)) {
+            return ["Resultado" => "ERROR", "Mensaje" => "Datos incompletos"];
+        }
+
+        // Consultar usuario por identificación y password exacto (según tu DB)
+        $sql = "SELECT id, identificacion, nombre FROM usuarios WHERE identificacion = ? AND password = ? LIMIT 1";
+        $stmt = mysqli_prepare($this->conexion, $sql);
+        mysqli_stmt_bind_param($stmt, "ss", $params->identificacion, $params->password);
         mysqli_stmt_execute($stmt);
         $res = mysqli_stmt_get_result($stmt);
 
-        $vec = [];
-        while ($row = mysqli_fetch_assoc($res)) {
-            $vec[] = $row;
+        if ($row = mysqli_fetch_assoc($res)) {
+            return [
+                "Resultado" => "OK",
+                "id" => $row['id'],
+                "identificacion" => $row['identificacion'],
+                "nombre" => $row['nombre']
+            ];
+        } else {
+            return ["Resultado" => "ERROR", "Mensaje" => "Identificación o contraseña incorrectos."];
         }
-        return $vec;
     }
 }
 ?>

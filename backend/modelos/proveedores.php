@@ -11,9 +11,10 @@ class Proveedores {
         $sql = "SELECT * FROM proveedores ORDER BY nombre";
         $res = mysqli_query($this->conexion, $sql);
 
-        if (!$res) {
-            die("Error en consulta: " . mysqli_error($this->conexion));
-        }
+        // Cambia esto en modelos/proveedores.php:
+      if (!$res) {
+      return []; // En lugar de die()
+      }
 
         $vec = [];
         while ($row = mysqli_fetch_assoc($res)) {

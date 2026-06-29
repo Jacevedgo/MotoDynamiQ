@@ -12,7 +12,7 @@ class Clientes {
         $res = mysqli_query($this->conexion, $sql);
 
         if (!$res) {
-            die("Error en consulta: " . mysqli_error($this->conexion));
+            return ["Resultado" => "ERROR", "Mensaje" => "Error en consulta: " . mysqli_error($this->conexion)];
         }
 
         $vec = [];
@@ -22,16 +22,19 @@ class Clientes {
         return $vec;
     }
 
-    // Insertar un nuevo cliente validando campos opcionales (Seguro)
+    // Insertar un nuevo cliente validando campos opcionales
     public function insertar($params) {
         $sql = "INSERT INTO clientes(nombre, telefono, email, direccion) VALUES (?, ?, ?, ?)";
         $stmt = mysqli_prepare($this->conexion, $sql);
         
-        // 🛡️ Validación de consistencia para valores nulos nativos
+        if (!$stmt) {
+            return ["Resultado" => "ERROR", "Mensaje" => "Error al preparar inserción: " . mysqli_error($this->conexion)];
+        }
+
         $nombre    = isset($params->nombre) ? trim($params->nombre) : '';
         $telefono  = !empty($params->telefono) ? trim($params->telefono) : null;
         $email     = !empty($params->email) ? trim($params->email) : null;
-        $direccion = !empty($params->direccion) ? trim($params->direccion) : 'No especificada';
+        $direccion = !empty($params->direccion) ? trim($params->direccion) : null; // Alineado a permitir NULL según phpMyAdmin
 
         mysqli_stmt_bind_param($stmt, "ssss", $nombre, $telefono, $email, $direccion);
         
@@ -48,16 +51,19 @@ class Clientes {
         }
     }
 
-    // 📝 EDITAR: Actualiza los datos desde la modal flotante usando Prepared Statements
+    // Actualiza los datos desde la modal flotante
     public function editar($id, $params) {
         $sql = "UPDATE clientes SET nombre = ?, telefono = ?, email = ?, direccion = ? WHERE id = ?";
         $stmt = mysqli_prepare($this->conexion, $sql);
         
-        // 🛡️ Mapeo y limpieza idéntica para resguardar la consistencia
+        if (!$stmt) {
+            return ["Resultado" => "ERROR", "Mensaje" => "Error al preparar actualización: " . mysqli_error($this->conexion)];
+        }
+
         $nombre    = isset($params->nombre) ? trim($params->nombre) : '';
         $telefono  = !empty($params->telefono) ? trim($params->telefono) : null;
         $email     = !empty($params->email) ? trim($params->email) : null;
-        $direccion = !empty($params->direccion) ? trim($params->direccion) : 'No especificada';
+        $direccion = !empty($params->direccion) ? trim($params->direccion) : null;
 
         mysqli_stmt_bind_param($stmt, "ssssi", $nombre, $telefono, $email, $direccion, $id);
         
@@ -74,26 +80,38 @@ class Clientes {
         }
     }
 
-    // 🗑️ ELIMINAR: Control estricto de integridad referencial ante ventas activas
+    // 🗑️ ELIMINAR CORREGIDO: Migrado completamente a mysqli para evitar colapsos
     public function eliminar($id) {
-    try {
-        $sql = "DELETE FROM clientes WHERE id = :id";
-        $stmt = $this->conexion->prepare($sql);
-        $stmt->bindParam(':id', $id);
-        $stmt->execute();
-        return ["Resultado" => "OK", "Mensaje" => "Cliente eliminado correctamente."];
-    } catch (PDOException $e) {
-        // Captura el error de llave foránea (1451)
-        if ($e->getCode() == 23000) {
-            return ["Resultado" => "ERROR", "Mensaje" => "No se puede eliminar: el cliente tiene ventas registradas."];
+        $sql = "DELETE FROM clientes WHERE id = ?";
+        $stmt = mysqli_prepare($this->conexion, $sql);
+
+        if (!$stmt) {
+            return ["Resultado" => "ERROR", "Mensaje" => "Error al preparar eliminación: " . mysqli_error($this->conexion)];
         }
-        return ["Resultado" => "ERROR", "Mensaje" => "Error al eliminar: " . $e->getMessage()];
+
+        mysqli_stmt_bind_param($stmt, "i", $id);
+        
+        if (mysqli_stmt_execute($stmt)) {
+            return ["Resultado" => "OK", "Mensaje" => "Cliente eliminado correctamente."];
+        } else {
+            $error_code = mysqli_errno($this->conexion);
+            // Captura el error de llave foránea (1451) ante compras o ventas activas
+            if ($error_code == 1451) {
+                return ["Resultado" => "ERROR", "Mensaje" => "No se puede eliminar: el cliente tiene transacciones vinculadas en el sistema."];
+            }
+            return ["Resultado" => "ERROR", "Mensaje" => "Error al eliminar (" . $error_code . "): " . mysqli_error($this->conexion)];
+        }
     }
-  }
+
     // Filtrar clientes dinámicamente por coincidencia en el nombre
     public function filtro($valor) {
         $sql = "SELECT * FROM clientes WHERE nombre LIKE ? ORDER BY nombre ASC";
         $stmt = mysqli_prepare($this->conexion, $sql);
+        
+        if (!$stmt) {
+            return [];
+        }
+
         $like = "%$valor%";
         mysqli_stmt_bind_param($stmt, "s", $like);
         mysqli_stmt_execute($stmt);

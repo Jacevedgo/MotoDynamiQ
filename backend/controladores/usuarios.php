@@ -1,42 +1,49 @@
 <?php
+// Encabezados para CORS y JSON
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept');
-header('Content-Type: application/json; charset=utf-8');
-
-if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') { exit(0); }
+header('Content-Type: application/json');
 
 require_once('../modelos/conexion.php');
 require_once('../modelos/usuarios.php');
 
+// Recibir parámetro de control
+$control = $_GET['control'];
+
 $usu = new Usuarios($conexion);
-$control = $_GET['control'] ?? '';
-
-// Leemos el JSON solo una vez al principio
-$json = file_get_contents('php://input');
-$params = json_decode($json);
-
-$vec = []; // Inicializamos la respuesta
 
 switch ($control) {
-    case 'consulta': 
-        $vec = $usu->consulta(); 
+    case 'consulta':
+        $vec = $usu->consulta();
         break;
-    case 'insertar': 
-        $vec = $usu->insertar($params); 
-        break;
-    case 'editar':   
-        $vec = $usu->editar($_GET['id'] ?? 0, $params); 
-        break;
-    case 'eliminar': 
-        $vec = $usu->eliminar($_GET['id'] ?? 0); 
-        break;
-    case 'login': 
-        $vec = $usu->login($params); 
-        break;
-    default: 
-        $vec = ["Resultado" => "ERROR", "Mensaje" => "Acción no válida"]; 
-        break;
-}
+    
+    case 'insertar':
+    $json = file_get_contents('php://input'); // Leemos el JSON real que envía Angular desde el formulario
+    $params = json_decode($json);
+    $vec = $usu->insertar($params);
+    break;
 
-echo json_encode($vec);
+    case 'eliminar':
+      $id = $_GET['id'];
+      $vec = $usu->eliminar($id);
+      break;
+
+    case 'editar':
+    $id = $_GET['id'] ?? 0;
+    // Capturamos lo que Angular realmente envía
+    $json = file_get_contents('php://input'); 
+    $params = json_decode($json);
+    $vec = $usu->editar($id, $params);
+    break;
+
+    case 'filtro':
+    $dato = $_GET['dato'] ?? '';
+    $vec = $usu->filtro($dato);
+    break;
+
+}
+      $datosj = json_encode($vec);
+      echo $datosj;
+      header('Content-Type: application/json');
+
 ?>

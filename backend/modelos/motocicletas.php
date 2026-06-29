@@ -6,84 +6,73 @@ class Motocicletas {
         $this->conexion = $conexion;
     }
 
-    // Consultar todas las motocicletas con su categoría real
     public function consulta() {
         $sql = "SELECT m.id, m.marca, m.modelo, m.fo_categoria, m.cilindraje, m.precio, m.stock, c.nombre AS categoria
                 FROM motocicletas m
-                LEFT JOIN categoria c ON m.fo_categoria = c.id_categoria
+                INNER JOIN categoria c ON m.fo_categoria = c.id_categoria
                 ORDER BY m.marca";
 
         // 🔥 CORREGIDO: Faltaba ejecutar la consulta en la base de datos
         $res = mysqli_query($this->conexion, $sql);
 
         if (!$res) {
-            return ["Resultado" => "ERROR", "Mensaje" => "Error en consulta: " . mysqli_error($this->conexion)];
+            die("Error en consulta: " . mysqli_error($this->conexion));
         }
 
         $vec = [];
-        while ($row = mysqli_fetch_assoc($res)) {
-            $vec[] = $row;
-        }
+        while ($row = mysqli_fetch_assoc($res)) { $vec[] = $row; }
         return $vec;
     }
 
-    // Insertar motocicleta incluyendo stock inicial corregido y validación real
+    // Insertar motocicleta incluyendo stock inicial corregido
     public function insertar($params) {
         if (empty($params->marca) || empty($params->modelo) || empty($params->fo_categoria)) {
             return ["Resultado" => "ERROR", "Mensaje" => "Marca, modelo y categoría son obligatorios"];
         }
 
+        // Incluimos stock en la inserción
         $sql = "INSERT INTO motocicletas (marca, modelo, fo_categoria, cilindraje, precio, stock) VALUES (?, ?, ?, ?, ?, ?)";
         $stmt = mysqli_prepare($this->conexion, $sql);
         
-        if (!$stmt) {
-            return ["Resultado" => "ERROR", "Mensaje" => "Error al preparar inserción: " . mysqli_error($this->conexion)];
-        }
+        // s = string, i = entero, d = double (decimal)
+        // marca(s), modelo(s), fo_categoria(i), cilindraje(i), precio(d), stock(i) -> "ssiidi"
+        mysqli_stmt_bind_param($stmt, "ssiidi", 
+            $params->marca, 
+            $params->modelo, 
+            $params->fo_categoria, 
+            $params->cilindraje, 
+            $params->precio, 
+            $params->stock
+        );
+        mysqli_stmt_execute($stmt);
 
-        $marca        = trim($params->marca);
-        $modelo       = trim($params->modelo);
-        $fo_categoria = intval($params->fo_categoria);
-        $cilindraje   = !empty($params->cilindraje) ? intval($params->cilindraje) : null;
-        $precio       = isset($params->precio) ? $params->precio : 0;
-        $stock        = isset($params->stock) ? intval($params->stock) : 0;
-
-        mysqli_stmt_bind_param($stmt, "ssiisi", $marca, $modelo, $fo_categoria, $cilindraje, $precio, $stock);
-        
-        if (mysqli_stmt_execute($stmt)) {
-            return ["Resultado" => "OK", "Mensaje" => "Motocicleta registrada correctamente"];
-        } else {
-            return ["Resultado" => "ERROR", "Mensaje" => "Error al ejecutar: " . mysqli_stmt_error($stmt)];
-        }
+        return ["Resultado" => "OK", "Mensaje" => "Motocicleta registrada correctamente"];
     }
 
-    // Editar motocicleta al 100% con verificación activa
+    // Editar motocicleta al 100%
     public function editar($id, $params) {
-        $sql = "UPDATE motocicletas 
-                SET marca = ?, modelo = ?, fo_categoria = ?, cilindraje = ?, precio = ?, stock = ? 
-                WHERE id = ?";
+        $sql = "UPDATE motocicletas SET marca = ?, modelo = ?, fo_categoria = ?, cilindraje = ?, precio = ?, stock = ? WHERE id = ?";
         $stmt = mysqli_prepare($this->conexion, $sql);
         
-        if (!$stmt) {
-            return ["Resultado" => "ERROR", "Mensaje" => "Error al preparar actualización: " . mysqli_error($this->conexion)];
-        }
+        // marca(s), modelo(s), fo_categoria(i), cilindraje(i), precio(d), stock(i), id(i) -> "ssiidii"
+        mysqli_stmt_bind_param($stmt, "ssiidii", 
+            $params->marca, 
+            $params->modelo, 
+            $params->fo_categoria, 
+            $params->cilindraje, 
+            $params->precio, 
+            $params->stock, 
+            $id
+        );
+        mysqli_stmt_execute($stmt);
 
-        $marca        = trim($params->marca);
-        $modelo       = trim($params->modelo);
-        $fo_categoria = intval($params->fo_categoria);
-        $cilindraje   = !empty($params->cilindraje) ? intval($params->cilindraje) : null;
-        $precio       = isset($params->precio) ? $params->precio : 0;
-        $stock        = isset($params->stock) ? intval($params->stock) : 0;
-
-        mysqli_stmt_bind_param($stmt, "ssiisii", $marca, $modelo, $fo_categoria, $cilindraje, $precio, $stock, $id);
-        
-        if (mysqli_stmt_execute($stmt)) {
-            return ["Resultado" => "OK", "Mensaje" => "La motocicleta ha sido actualizada con éxito."];
-        } else {
-            return ["Resultado" => "ERROR", "Mensaje" => "Error al actualizar: " . mysqli_stmt_error($stmt)];
-        }
+        return [
+            "Resultado" => "OK",
+            "Mensaje" => "La motocicleta ha sido actualizada"
+        ];
     }
 
-    // Eliminar motocicleta con try-catch nativo de mysqli_sql_exception
+    // Eliminar motocicleta con try-catch por si tiene ventas/compras amarradas
     public function eliminar($id) {
         $sql = "DELETE FROM motocicletas WHERE id = ?";
         $stmt = mysqli_prepare($this->conexion, $sql);
@@ -93,26 +82,18 @@ class Motocicletas {
         }
 
         mysqli_stmt_bind_param($stmt, "i", $id);
-
         try {
-            if (mysqli_stmt_execute($stmt)) {
-                return ["Resultado" => "OK", "La motocicleta ha sido eliminada"];
-            } else {
-                return ["Resultado" => "ERROR", "Mensaje" => "No se pudo ejecutar la eliminación."];
-            }
+            mysqli_stmt_execute($stmt);
+            return ["Resultado" => "OK", "Mensaje" => "La motocicleta ha sido eliminada"];
         } catch (mysqli_sql_exception $e) {
-            if ($e->getCode() == 1451) {
-                return ["Resultado" => "ERROR", "Mensaje" => "No se puede eliminar la motocicleta porque está asociada a un historial activo de compras o ventas"];
-            }
-            return ["Resultado" => "ERROR", "Mensaje" => "Error crítico: " . $e->getMessage()];
+            return ["Resultado" => "ERROR", "Mensaje" => "No se puede eliminar la motocicleta porque está asociada a un historial de compras o ventas"];
         }
     }
 
-    // Filtrar motocicletas por marca o modelo
     public function filtro($valor) {
         $sql = "SELECT m.id, m.marca, m.modelo, m.fo_categoria, m.cilindraje, m.precio, m.stock, c.nombre AS categoria
                 FROM motocicletas m
-                LEFT JOIN categoria c ON m.fo_categoria = c.id_categoria
+                INNER JOIN categoria c ON m.fo_categoria = c.id_categoria
                 WHERE m.marca LIKE ? OR m.modelo LIKE ?
                 ORDER BY m.marca";
         
@@ -129,9 +110,15 @@ class Motocicletas {
         $res = mysqli_stmt_get_result($stmt);
 
         $vec = [];
-        while ($row = mysqli_fetch_assoc($res)) {
-            $vec[] = $row;
-        }
+        while ($row = mysqli_fetch_assoc($res)) { $vec[] = $row; }
+        return $vec;
+    }
+
+    public function obtenerCategorias() {
+        $sql = "SELECT id_categoria, nombre FROM categorias ORDER BY nombre";
+        $res = mysqli_query($this->conexion, $sql);
+        $vec = [];
+        while ($row = mysqli_fetch_assoc($res)) { $vec[] = $row; }
         return $vec;
     }
 }

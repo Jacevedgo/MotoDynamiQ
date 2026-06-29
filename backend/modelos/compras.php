@@ -4,10 +4,12 @@ class Compras {
     public function __construct($conexion) { $this->conexion = $conexion; }
 
     public function consulta() {
-        $sql = "SELECT co.id, co.fecha, pr.nombre AS proveedor, u.nombre AS usuario, co.total
+        $sql = "SELECT co.id, co.fecha, co.proveedor_id, co.usuario_id, co.total, 
+                       IFNULL(pr.nombre, 'Sin proveedor') AS proveedor, 
+                       IFNULL(u.nombre, 'Sin usuario') AS usuario
                 FROM compras co
-                INNER JOIN proveedores pr ON co.proveedor_id = pr.id
-                INNER JOIN usuarios u ON co.usuario_id = u.id
+                LEFT JOIN proveedores pr ON co.proveedor_id = pr.id
+                LEFT JOIN usuarios u ON co.usuario_id = u.id
                 ORDER BY co.fecha DESC";
         $res = mysqli_query($this->conexion, $sql);
         $vec = [];
@@ -16,14 +18,11 @@ class Compras {
     }
 
     public function insertar($params) {
-        $stmt = mysqli_prepare($this->conexion, "INSERT INTO compras (fecha, proveedor_id, usuario_id, total) VALUES (?, ?, ?, ?)");
+        $sql = "INSERT INTO compras (fecha, proveedor_id, usuario_id, total) VALUES (?, ?, ?, ?)";
+        $stmt = mysqli_prepare($this->conexion, $sql);
         mysqli_stmt_bind_param($stmt, "siid", $params->fecha, $params->proveedor_id, $params->usuario_id, $params->total);
         mysqli_stmt_execute($stmt);
-
-        return [
-            "Resultado" => "OK",
-            "Mensaje" => "La compra ha sido registrada"
-        ];
+        return ["Resultado" => "OK", "Mensaje" => "Insertado correctamente"];
     }
 
     public function editar($id, $params) {
@@ -31,71 +30,45 @@ class Compras {
         $stmt = mysqli_prepare($this->conexion, $sql);
         mysqli_stmt_bind_param($stmt, "siidi", $params->fecha, $params->proveedor_id, $params->usuario_id, $params->total, $id);
         mysqli_stmt_execute($stmt);
-
-        return [
-            "Resultado" => "OK",
-            "Mensaje" => "La compra ha sido actualizada"
-        ];
+        return ["Resultado" => "OK", "Mensaje" => "Actualizado correctamente"];
     }
 
     public function eliminar($id) {
-    mysqli_begin_transaction($this->conexion);
-    try {
-        // A. Buscar los detalles de esta compra para saber qué motos se compraron
-        $sqlDetalles = "SELECT motocicleta_id, cantidad FROM detalle_compras WHERE compra_id = ?";
-        $stmtD = mysqli_prepare($this->conexion, $sqlDetalles);
-        mysqli_stmt_bind_param($stmtD, "i", $id);
-        mysqli_stmt_execute($stmtD);
-        $resD = mysqli_stmt_get_result($stmtD);
+        mysqli_begin_transaction($this->conexion);
+        try {
+            // Revertir stock (opcional, solo si usas detalle_compra)
+            $sqlStock = "UPDATE motocicletas m 
+                         JOIN detalle_compra dc ON m.id = dc.motocicleta_id 
+                         SET m.stock = m.stock - dc.cantidad 
+                         WHERE dc.compra_id = ?";
+            $stmtS = mysqli_prepare($this->conexion, $sqlStock);
+            mysqli_stmt_bind_param($stmtS, "i", $id);
+            mysqli_stmt_execute($stmtS);
 
-        // B. Revertir el stock en la tabla motocicletas
-        $sqlStock = "UPDATE motocicletas SET stock = stock - ? WHERE id = ?";
-        $stmtStock = mysqli_prepare($this->conexion, $sqlStock);
-        
-        while ($det = mysqli_fetch_assoc($resD)) {
-            mysqli_stmt_bind_param($stmtStock, "ii", $det['cantidad'], $det['motocicleta_id']);
-            mysqli_stmt_execute($stmtStock);
+            // Eliminar detalles y compra
+            mysqli_query($this->conexion, "DELETE FROM detalle_compra WHERE compra_id = $id");
+            mysqli_query($this->conexion, "DELETE FROM compras WHERE id = $id");
+            
+            mysqli_commit($this->conexion);
+            return ["Resultado" => "OK", "Mensaje" => "Compra eliminada"];
+        } catch (Exception $e) {
+            mysqli_rollback($this->conexion);
+            return ["Resultado" => "ERROR", "Mensaje" => "Error al eliminar"];
         }
-
-        // C. Borrar los detalles de la compra
-        $sqlDelDet = "DELETE FROM detalle_compras WHERE compra_id = ?";
-        $stmtDelDet = mysqli_prepare($this->conexion, $sqlDelDet);
-        mysqli_stmt_bind_param($stmtDelDet, "i", $id);
-        mysqli_stmt_execute($stmtDelDet);
-
-        // D. Finalmente borrar el encabezado de la compra
-        $sqlDelEnc = "DELETE FROM compras WHERE id = ?";
-        $stmtDelEnc = mysqli_prepare($this->conexion, $sqlDelEnc);
-        mysqli_stmt_bind_param($stmtDelEnc, "i", $id);
-        mysqli_stmt_execute($stmtDelEnc);
-
-        mysqli_commit($this->conexion);
-        return ["Resultado" => "OK", "Mensaje" => "Compra eliminada y stock ajustado correctamente"];
-    } catch (Exception $e) {
-        mysqli_rollback($this->conexion);
-        return ["Resultado" => "ERROR", "Mensaje" => "No se pudo eliminar: " . $e->getMessage()];
     }
-  }
 
     public function filtro($dato) {
-        // 🔍 Ajustado con INNER JOINs para que la tabla no pierda los nombres al buscar
-        $sql = "SELECT co.id, co.fecha, pr.nombre AS proveedor, u.nombre AS usuario, co.total
+        $sql = "SELECT co.id, co.fecha, co.total, pr.nombre AS proveedor
                 FROM compras co
-                INNER JOIN proveedores pr ON co.proveedor_id = pr.id
-                INNER JOIN usuarios u ON co.usuario_id = u.id
-                WHERE pr.nombre LIKE ? OR co.fecha LIKE ?
-                ORDER BY co.fecha DESC";
-        
+                LEFT JOIN proveedores pr ON co.proveedor_id = pr.id
+                WHERE pr.nombre LIKE ? OR co.fecha LIKE ?";
         $stmt = mysqli_prepare($this->conexion, $sql);
-        $like = "%" . $dato . "%";
+        $like = "%$dato%";
         mysqli_stmt_bind_param($stmt, "ss", $like, $like);
         mysqli_stmt_execute($stmt);
         $res = mysqli_stmt_get_result($stmt);
-
         $vec = [];
-        while ($row = mysqli_fetch_assoc($res)) {
-            $vec[] = $row;
-        }
+        while ($row = mysqli_fetch_assoc($res)) { $vec[] = $row; }
         return $vec;
     }
 }

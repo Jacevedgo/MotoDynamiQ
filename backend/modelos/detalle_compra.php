@@ -6,20 +6,12 @@ class DetalleCompras {
         $this->conexion = $conexion;
     }
 
-    public function consulta() {
-        // CORREGIDO: tabla 'detalle_compra' (singular)
-        $sql = "SELECT dc.id, co.fecha, m.marca, m.modelo, dc.cantidad, dc.subtotal, pr.nombre AS proveedor
-                FROM detalle_compra dc
-                INNER JOIN compras co ON dc.compra_id = co.id
-                INNER JOIN motocicletas m ON dc.motocicleta_id = m.id
-                INNER JOIN proveedores pr ON co.proveedor_id = pr.id
-                ORDER BY co.fecha DESC";
-        $res = mysqli_query($this->conexion, $sql);
-        if (!$res) return ["Resultado" => "ERROR", "Mensaje" => mysqli_error($this->conexion)];
-
-        $vec = [];
-        while ($row = mysqli_fetch_assoc($res)) { $vec[] = $row; }
-        return $vec;
+    // Asegúrate que en modelos/detalle_compra.php esta consulta sea la correcta:
+public function consulta() {
+    $sql = "SELECT dc.id, dc.compra_id, dc.motocicleta_id, dc.cantidad, dc.subtotal 
+            FROM detalle_compra dc"; // Quita los JOINs temporalmente para descartar errores de ID
+    $res = mysqli_query($this->conexion, $sql);
+    // ... resto del código
     }
 
     public function insertar($params) {

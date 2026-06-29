@@ -11,3 +11,4 @@ $db       = "motodynamiq";
   // echo"Se conecto correctamenete";
 
 ?>
+

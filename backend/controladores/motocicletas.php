@@ -4,60 +4,39 @@ header('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Ac
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Content-Type: application/json; charset=UTF-8');
 
-if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-    exit(0);
-}
+if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') { exit(0); }
 
 require_once('../modelos/conexion.php');
 require_once('../modelos/motocicletas.php');
 
-// Recibir parámetro de control de forma segura
-$control = isset($_GET['control']) ? $_GET['control'] : '';
-$vec = []; 
-
+$control = $_GET['control'] ?? '';
 $mon = new Motocicletas($conexion);
 
-// Capturar el JSON real que envía Angular desde el cuerpo de la petición (HTTP POST)
 $json = file_get_contents('php://input');
 $params = json_decode($json);
+$vec = []; 
 
 switch ($control) {
     case 'consulta':
-        $vec = $moto->consulta();
+        $vec = $mon->consulta();
         break;
     case 'insertar':
-        if ($params) {
-            $vec = $mon->insertar($params);
-        } else {
-            $vec = ["Resultado" => "ERROR", "Mensaje" => "No se recibieron datos para registrar la motocicleta."];
-        }
+        $vec = $params ? $mon->insertar($params) : ["Resultado" => "ERROR", "Mensaje" => "Datos vacíos"];
         break;
     case 'eliminar':
         $id = $_GET['id'] ?? 0;
-        $vec = $moto->eliminar($id);
+        $vec = $mon->eliminar($id);
         break;
-
     case 'editar':
-        $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
-        if ($params) {
-            $vec = $mon->editar($id, $params);
-        } else {
-            $vec = ["Resultado" => "ERROR", "Mensaje" => "No se recibieron datos para actualizar."];
-        }
+        $id = $_GET['id'] ?? 0;
+        $vec = $params ? $mon->editar($id, $params) : ["Resultado" => "ERROR", "Mensaje" => "Datos vacíos"];
         break;
-
     case 'filtro':
         $dato = $_GET['dato'] ?? '';
-        $vec = $moto->filtro($dato);
+        $vec = $mon->filtro($dato);
         break;
-
-    // 🏷️ CASO EXTRA: Para cargar dinámicamente el select de categorías en el formulario
     case 'categorias':
-        $sql = "SELECT id_categoria AS id, nombre FROM categoria ORDER BY nombre";
-        $res = mysqli_query($conexion, $sql);
-        while ($row = mysqli_fetch_assoc($res)) {
-            $vec[] = $row;
-        }
+        $vec = $mon->obtenerCategorias();
         break;
 }
 

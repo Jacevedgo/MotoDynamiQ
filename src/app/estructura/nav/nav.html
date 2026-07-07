@@ -1,0 +1,52 @@
+<button class="sidebar-toggle-btn" [class.show]="isSidebarHidden" (click)="toggleSidebar()">
+  {{ isSidebarHidden ? '▶' : '◀' }}
+</button>
+
+<div class="sidebar" [class.hidden]="isSidebarHidden">
+  <ul class="sidebar-menu">
+    <li class="sidebar-item">
+      <a class="sidebar-link" routerLink="inicio">🏠 Inicio</a>
+    </li>
+    <li class="sidebar-item">
+      <a class="sidebar-link" routerLink="clientes">👥 Clientes</a>
+    </li>
+    <li class="sidebar-item">
+      <a class="sidebar-link" routerLink="motocicletas">🏍️ Motocicletas</a>
+    </li>
+    <li class="sidebar-item">
+      <a class="sidebar-link" routerLink="proveedores">🏢 Proveedores</a>
+    </li>
+    <li class="sidebar-item">
+      <a class="sidebar-link" routerLink="compras">📦 Compras</a>
+    </li>
+    <li class="sidebar-item">
+      <a class="sidebar-link" routerLink="ventas">💰 Ventas</a>
+    </li>
+    <li class="sidebar-item">
+      <a class="sidebar-link" routerLink="reportes">📈 Reportes</a>
+    </li>
+    <li class="sidebar-item">
+      <a class="sidebar-link" routerLink="usuarios">🔑 Usuarios</a>
+    </li>
+
+    <li
+      class="sidebar-item mt-auto"
+      style="margin-top: auto; border-top: 1px solid #334155; padding-top: 10px"
+    >
+      <button
+        class="sidebar-link"
+        (click)="cerrarSesion()"
+        style="
+          background: none;
+          border: none;
+          cursor: pointer;
+          color: #ef4444;
+          width: 100%;
+          text-align: left;
+        "
+      >
+        🚪 Cerrar Sesión
+      </button>
+    </li>
+  </ul>
+</div>

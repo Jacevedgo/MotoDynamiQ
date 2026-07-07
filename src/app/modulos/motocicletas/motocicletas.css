@@ -1,0 +1,264 @@
+/* ==========================================================================
+   🎛️ Contenedor Principal (Modo Oscuro)
+   ========================================================================== */
+.compras-container {
+  padding: 30px;
+  font-family: sans-serif;
+  background-color: #0f172a; /* Fondo ultra oscuro de MotoDynamiQ */
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* 📝 Encabezado del módulo */
+.modulo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.modulo-header h1 {
+  font-size: 26px;
+  color: #f8fafc; /* Blanco legible */
+  margin: 0;
+}
+.modulo-header p {
+  color: #94a3b8; /* Gris azulado suave */
+  margin: 4px 0 0 0;
+}
+
+/* 🔵 Botón Nuevo */
+.btn-nuevo {
+  background-color: #3b82f6;
+  color: #ffffff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    transform 0.1s;
+}
+.btn-nuevo:hover {
+  background-color: #2563eb;
+}
+.btn-nuevo:active {
+  transform: scale(0.98);
+}
+
+/* ==========================================================================
+   📑 Formulario de Registro Estilo Premium
+   ========================================================================== */
+.formulario-compras {
+  background: linear-gradient(145deg, #1e293b, #111827); /* Degradado premium */
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 30px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+}
+
+.formulario-compras h2 {
+  color: #f8fafc;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  color: #94a3b8;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Aplica tanto a inputs de texto/número como al elemento select */
+.input-form {
+  background-color: #0f172a;
+  border: 1px solid #475569;
+  border-radius: 8px;
+  padding: 12px 14px;
+  color: #f8fafc;
+  font-size: 0.95rem;
+  outline: none;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+  appearance: none; /* Elimina estilos por defecto de select en algunos navegadores */
+}
+
+/* Flecha personalizada sutil para el select en modo oscuro */
+select.input-form {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 16px;
+  padding-right: 40px;
+}
+
+.input-form:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+/* 🟢 Botón de Guardar */
+.btn-guardar {
+  background-color: #10b981; /* Verde esmeralda */
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition:
+    background-color 0.2s,
+    transform 0.1s;
+}
+
+.btn-guardar:hover {
+  background-color: #059669;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+.btn-guardar:active {
+  transform: scale(0.98);
+}
+
+/* ==========================================================================
+   🔍 Buscador
+   ========================================================================== */
+.search-bar {
+  margin-bottom: 20px;
+}
+.input-search {
+  width: 100%;
+  max-width: 400px;
+  padding: 10px 16px;
+  background-color: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #f8fafc;
+  outline: none;
+}
+.input-search:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+/* ==========================================================================
+   📊 Tabla de Datos Estilizada
+   ========================================================================== */
+.table-responsive {
+  background-color: #1e293b; /* Fondo oscuro de la tabla */
+  border: 1px solid #334155;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+.data-table th {
+  background-color: #0f172a; /* Encabezado más oscuro */
+  color: #94a3b8;
+  padding: 16px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.data-table td {
+  padding: 16px;
+  border-bottom: 1px solid #334155;
+  color: #e2e8f0;
+  font-size: 14px;
+}
+
+/* 🦓 Efecto cebra e interactividad */
+.data-table tbody tr:nth-child(even) {
+  background-color: #162238; /* Alternancia de filas */
+}
+.data-table tbody tr:hover {
+  background-color: #1e293b; /* Efecto hover */
+}
+
+/* ==========================================================================
+   🏷️ Badges y Estados de las Motocicletas
+   ========================================================================== */
+.badge-categoria {
+  background-color: #334155;
+  color: #cbd5e1;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid #475569;
+}
+
+.badge-estado {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.badge-estado.disponible {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.badge-estado.agotado {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* ⚙️ Botones de acción */
+.actions-wrapper {
+  display: flex;
+  gap: 8px;
+}
+.btn-accion {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  color: #94a3b8;
+  font-size: 1.1rem;
+  transition:
+    background 0.2s,
+    transform 0.1s;
+}
+.btn-accion:hover {
+  background-color: #334155;
+  color: #f8fafc;
+}
+
+/* Agrega esto al final de tu motocicletas.css para mejorar el feedback visual */
+.btn-accion:hover.delete-icon {
+  background-color: rgba(239, 68, 68, 0.15); /* Fondo rojizo suave al pasar el mouse */
+  color: #f87171; /* Icono rojo */
+}

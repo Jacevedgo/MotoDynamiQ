@@ -1,0 +1,93 @@
+/* 🧱 Contenedor principal del menú lateral */
+.sidebar {
+  width: 250px;
+  height: calc(100vh - 80px); /* 📏 Espacio libre debajo del header */
+  background-color: #0d1117; /* 🌌 Negro azulado profundo */
+  position: fixed;
+  left: 0;
+  top: 80px; /* 👈 Alineado justo debajo de la cabecera */
+  z-index: 99;
+  padding: 24px 16px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #21262d; /* 🎛️ Línea divisoria sutil */
+  /* ⏱️ Transición cúbica para un deslizamiento suave y profesional */
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 🙈 Estado oculto: desplaza la barra por completo fuera de la pantalla */
+.sidebar.hidden {
+  transform: translateX(-100%);
+}
+
+/* 📋 Lista de ítems (Se mantiene intacta la clase) */
+.sidebar-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* 🔗 Enlaces de navegación con transiciones suaves */
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  color: #8b949e; /* 2️⃣ Gris atenuado elegante */
+  text-decoration: none;
+  padding: 12px 16px;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  transition: all 0.25s ease-in-out;
+}
+
+/* ✨ Efecto Hover: Iluminación azul sutil */
+.sidebar-link:hover {
+  background-color: #161b22;
+  color: #58a6ff; /* 🔹 Azul tecnológico */
+  padding-left: 22px; /* 🏎️ Desplazamiento interactivo */
+  box-shadow:
+    0 4px 12px rgba(88, 166, 255, 0.08),
+    inset 3px 0 0 #58a6ff; /* 💎 Indicador izquierdo */
+}
+
+/* 🎛️ Pestaña flotante para recuperar o contraer el menú */
+.sidebar-toggle-btn {
+  position: fixed;
+  top: 95px; /* 👈 Ubicada cómodamente debajo del header */
+  left: 250px; /* 📍 Se posiciona justo en el borde derecho de la barra abierta */
+  background-color: #0d1117;
+  color: #58a6ff;
+  border: 1px solid #21262d;
+  border-left: none; /* 🧱 Remueve el borde izquierdo para integrarse con la barra */
+  border-radius: 0 8px 8px 0; /* 🪵 Bordes redondeados solo en el lado derecho */
+  padding: 10px 14px;
+  font-size: 16px;
+  cursor: pointer;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.2);
+  /* ⏱️ Sincroniza el movimiento junto con la barra lateral */
+  transition:
+    left 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.2s;
+}
+
+/* 🔄 Cuando la barra se oculta, la pestaña viaja al borde izquierdo de la pantalla (left: 0) */
+.sidebar-toggle-btn.show {
+  left: 0;
+}
+
+.sidebar-toggle-btn:hover {
+  background-color: #161b22;
+  color: #ffffff;
+}

@@ -1,0 +1,176 @@
+<div class="reportes-container">
+  <header class="modulo-header">
+    <div class="header-info">
+      <h1><span class="icon">📊</span> Panel de Reportes y Auditoría</h1>
+      <p>Análisis de rendimiento, historial de documentos generados y métricas del sistema.</p>
+    </div>
+    <button class="btn-exportar">📥 Exportar PDF</button>
+  </header>
+
+  <div class="balance-summary">
+    <div class="balance-card ingresos">
+      <div class="card-header">
+        <h3>Total Ingresos</h3>
+        <span class="card-icon">💰</span>
+      </div>
+      <p class="amount">$85.400.000</p>
+      <span class="trend positivo">▲ +12% este mes</span>
+    </div>
+
+    <div class="balance-card egresos">
+      <div class="card-header">
+        <h3>Total Egresos (Compras)</h3>
+        <span class="card-icon">🛒</span>
+      </div>
+      <p class="amount">$63.500.000</p>
+      <span class="trend negativo">▼ +5% en costos</span>
+    </div>
+  </div>
+
+  <div class="analytics-section">
+    <h2>🎯 Cumplimiento de Metas por Marca</h2>
+
+    <div class="goal-item">
+      <div class="goal-info">
+        <span>Ventas Yamaha (Meta: 20)</span>
+        <strong>80%</strong>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill yamaha" style="width: 80%"></div>
+      </div>
+    </div>
+
+    <div class="goal-item">
+      <div class="goal-info">
+        <span>Ventas Honda (Meta: 15)</span>
+        <strong>50%</strong>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill honda" style="width: 50%"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="analytics-section history-section">
+    <div class="section-header">
+      <h2>📜 Historial de Documentos Recientes</h2>
+      <div class="search-bar">
+        <input
+          type="text"
+          placeholder="Buscar reporte por título o usuario..."
+          class="input-search"
+        />
+      </div>
+    </div>
+
+    <div class="analytics-section form-section">
+      <h2>📝 Registrar Nuevo Reporte de Transacciones</h2>
+      <form (ngSubmit)="crearReporte()">
+        <div class="form-group">
+          <label>Tipo de Transacción / Título</label>
+          <input
+            type="text"
+            [(ngModel)]="nuevoReporte.titulo"
+            name="titulo"
+            placeholder="Ej: Reporte de Ventas Semanal o Detalle de Compras"
+            class="input-search"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Descripción del Evento</label>
+          <textarea
+            [(ngModel)]="nuevoReporte.descripcion"
+            name="descripcion"
+            placeholder="Escribe el balance detallado de los artículos..."
+            class="input-search"
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Fecha de Generación</label>
+          <input
+            type="date"
+            [(ngModel)]="nuevoReporte.fecha"
+            name="fecha"
+            class="input-search"
+            required
+          />
+        </div>
+
+        <button
+          type="button"
+          class="btn-exportar"
+          style="margin-top: 15px; background-color: #2ecc71"
+          (click)="nuevoReporte.id ? actualizarReporte() : crearReporte()"
+        >
+          💾 {{ nuevoReporte.id ? 'Actualizar Reporte' : 'Guardar Reporte' }}
+        </button>
+        <button
+          *ngIf="nuevoReporte.id"
+          type="button"
+          (click)="limpiarFormulario()"
+          class="btn-cancelar"
+        >
+          Cancelar
+        </button>
+      </form>
+    </div>
+
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Documento / Título</th>
+            <th>Descripción del Evento</th>
+            <th>Fecha de Generación</th>
+            <th>Responsable</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (reporte of listaReportes; track reporte.id) {
+            <tr>
+              <td class="col-id">
+                <span class="badge-id">#{{ reporte.id }}</span>
+              </td>
+              <td class="col-titulo">
+                <div class="doc-title-wrapper">
+                  <span class="file-icon">📄</span>
+                  <strong>{{ reporte.titulo }}</strong>
+                </div>
+              </td>
+              <td class="col-desc">{{ reporte.descripcion }}</td>
+              <td class="col-fecha">
+                <span class="date-tag">📅 {{ reporte.fecha }}</span>
+              </td>
+              <td class="col-usuario">
+                <div class="user-badge">
+                  <span class="user-avatar">👤</span>
+                  <span class="user-name">{{ reporte.usuario }}</span>
+                </div>
+              </td>
+              <td class="col-acciones">
+                <div style="display: flex; gap: 10px">
+                  <button class="btn-accion" (click)="seleccionarReporte(reporte)" title="Editar">
+                    ✏️
+                  </button>
+                  <button
+                    class="btn-accion"
+                    (click)="borrarReporte(reporte.id)"
+                    title="Eliminar"
+                    style="color: #ef4444"
+                  >
+                    🗑️
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

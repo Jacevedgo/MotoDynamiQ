@@ -1,0 +1,111 @@
+/* ==========================================================================
+   🎛️ Contenedor Principal (Integrado al Ecosistema MotoDynamiQ)
+   ========================================================================== */
+.dashboard-container {
+  padding: 30px;
+  font-family: sans-serif;
+  background-color: #0f172a; /* Fondo ultra oscuro profundo unificado */
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* 📝 Encabezado */
+.dashboard-header h1 {
+  font-size: 28px;
+  color: #f8fafc; /* Blanco premium de alta intensidad */
+  margin: 0 0 8px 0;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+.dashboard-header p {
+  color: #94a3b8; /* Gris azulado suave para subtítulos */
+  margin: 0 0 30px 0;
+  font-size: 1rem;
+}
+
+/* ==========================================================================
+   📊 Malla Adaptativa para las Tarjetas de Estadísticas
+   ========================================================================== */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+/* 📇 Estilo de la Tarjeta de Estadística (Diseño Premium) */
+.stat-card {
+  background: linear-gradient(145deg, #1e293b, #111827); /* Elegante degradado oscuro */
+  border: 1px solid #334155; /* Borde sutil divisorio */
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+/* 🌟 Efecto Hover Interactivo con Iluminación Selectiva */
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px -5px rgba(0, 0, 0, 0.6);
+}
+
+/* Destello de color en los bordes según la tarjeta activa */
+.stat-card:has(.icon-moto):hover {
+  border-color: #3b82f6;
+} /* Destello Azul */
+.stat-card:has(.icon-sales):hover {
+  border-color: #10b981;
+} /* Destello Verde */
+.stat-card:has(.icon-alert):hover {
+  border-color: #ef4444;
+} /* Destello Rojo */
+
+/* ==========================================================================
+   🎨 Iconos Circulares Neon Translúcidos
+   ========================================================================== */
+.stat-icon {
+  font-size: 24px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.05);
+}
+
+/* Fondos atenuados con opacidad para lograr el efecto cristal/neón */
+.icon-moto {
+  background-color: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
+}
+.icon-sales {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+}
+.icon-alert {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+/* ==========================================================================
+   🔢 Textos y Tipografías de Datos
+   ========================================================================== */
+.stat-details h3 {
+  margin: 0;
+  font-size: 32px; /* Aumentado ligeramente para mejorar impacto analítico */
+  color: #ffffff; /* Cifras numéricas en blanco puro */
+  font-weight: 700;
+  line-height: 1;
+}
+.stat-details p {
+  margin: 6px 0 0 0;
+  color: #94a3b8; /* Gris suave de alta legibilidad */
+  font-size: 14px;
+  font-weight: 500;
+}

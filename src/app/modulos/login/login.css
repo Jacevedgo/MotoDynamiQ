@@ -1,0 +1,45 @@
+/* 1. Fuerza al fondo de toda la aplicación a ser oscuro */
+body,
+html,
+app-root {
+  background-color: #0b1120 !important;
+  height: 100%;
+  margin: 0;
+}
+
+/* 2. Asegura que el contenedor ocupe toda la pantalla */
+.container {
+  background-color: #0b1120 !important;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-card {
+  background-color: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: 16px;
+  padding: 2.5rem !important;
+  width: 400px;
+  color: #f1f5f9;
+}
+
+/* 3. Asegura que el texto del label sea blanco */
+.form-label {
+  color: #ffffff !important;
+}
+
+/* 4. Asegura que el texto dentro del input sea blanco */
+.form-control {
+  background-color: #1e293b !important;
+  border: 1px solid #334155 !important;
+  color: #ffffff !important; /* Letras blancas */
+  border-radius: 8px;
+  padding: 12px;
+}
+
+/* Color del texto de ayuda (placeholder) */
+.form-control::placeholder {
+  color: #94a3b8 !important;
+}

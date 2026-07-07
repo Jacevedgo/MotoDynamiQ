@@ -1,0 +1,40 @@
+<div class="container d-flex align-items-center justify-content-center vh-100">
+  <div class="card p-4 shadow login-card">
+    <div class="text-center mb-3">
+      <h2 class="brand">Moto<span>DynamiQ</span></h2>
+      <p>Gestión de Inventario de Motocicletas</p>
+    </div>
+
+    <form (submit)="iniciarSesion()">
+      <div class="mb-3">
+        <label class="form-label">Identificación</label>
+        <input
+          type="text"
+          [(ngModel)]="usuario.identificacion"
+          name="identificacion"
+          class="form-control"
+          placeholder="Ej. 1001"
+          required
+        />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Contraseña</label>
+        <input
+          type="password"
+          [(ngModel)]="usuario.password"
+          name="password"
+          class="form-control"
+          placeholder="********"
+          required
+        />
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100">Iniciar Sesión</button>
+
+      <div class="text-center mt-3">
+        <a href="#">¿Olvidaste tu contraseña?</a><br />
+        <a href="#">Crear cuenta</a>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,12 @@
+/* 🏢 Contenedor del contenido y del header */
+.main-content-wrapper {
+  margin-left: auto; /* 📍 Deja el espacio exacto cuando la barra está abierta */
+  width: calc(auto); /* 📐 Ocupa el resto exacto de la pantalla */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* ⏱️ Movimiento suave sincronizado */
+}
+
+/* 🔄 Cuando la barra se oculta, el contenedor toma todo el espacio */
+.main-content-wrapper.expanded {
+  margin-left: 0;
+  width: 100%;
+}

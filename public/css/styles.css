@@ -1,0 +1,6 @@
+body { font-family: Arial; }
+.login-bg { background: linear-gradient(#0d1b2a, #1b263b); }
+.login-card { width: 350px; }
+.brand span { color: orange; }
+
+.sidebar { width: 220px; min-height: 100vh; }

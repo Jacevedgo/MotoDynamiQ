@@ -1,0 +1,136 @@
+<div class="usuarios-container">
+  <header class="modulo-header">
+    <div class="header-info">
+      <h1>Control de Usuarios</h1>
+      <p>Gestiona los accesos, roles y permisos del personal del almacén</p>
+    </div>
+    <button class="btn-nuevo">+ Nuevo Usuario</button>
+  </header>
+
+  <div class="search-bar">
+    <input
+      type="text"
+      placeholder="Buscar usuario por nombre o identificacion..."
+      class="input-search"
+    />
+  </div>
+
+  <div class="analytics-section form-section">
+    <h2><span class="icon">➕</span> Registrar Nuevo Usuario</h2>
+
+    <form class="usuarios-form">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="nombre">Nombre Completo</label>
+          <input
+            type="text"
+            id="nombre"
+            name="nombre"
+            [(ngModel)]="nuevoUsuario.nombre"
+            class="input-form"
+            placeholder="Ej. Ana Gómez"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="identificacion">Identificación</label>
+          <input
+            type="text"
+            id="identificacion"
+            name="identificacion"
+            [(ngModel)]="nuevoUsuario.identificacion"
+            class="input-form"
+            placeholder="Ej. 1001"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="rol">Rol / Permisos</label>
+          <select id="rol" name="rol" [(ngModel)]="nuevoUsuario.rol" class="input-form select-form">
+            <option value="" disabled selected>Selecciona un rol...</option>
+            <option value="Administrador">Administrador</option>
+            <option value="Vendedor">Vendedor</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" (click)="guardarUsuario()" class="btn-guardar">
+          💾 {{ nuevoUsuario.id ? 'Actualizar Usuario' : 'Guardar Usuario' }}
+        </button>
+
+        <button
+          *ngIf="nuevoUsuario.id"
+          type="button"
+          (click)="limpiarFormulario()"
+          class="btn-cancelar"
+          style="
+            background-color: #64748b;
+            margin-left: 10px;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+          "
+        >
+          Cancelar
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre Completo</th>
+          <th>Identificación</th>
+          <th>Rol / Permisos</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (usuario of listaUsuarios; track usuario.id) {
+          <tr>
+            <td class="col-id">
+              <span class="badge-id">#{{ usuario.id }}</span>
+            </td>
+            <td class="col-nombre">
+              <div class="doc-title-wrapper">
+                <span class="file-icon">👤</span>
+                <strong>{{ usuario.nombre }}</strong>
+              </div>
+            </td>
+            <td class="col-identificacion">
+              <code>{{ usuario.identificacion }}</code>
+            </td>
+            <td class="col-rol">
+              <span class="user-badge">
+                <span class="user-avatar">🛡️</span>
+                <span class="user-name">{{ usuario.rol }}</span>
+              </span>
+            </td>
+            <td>
+              <button
+                (click)="seleccionarUsuario(usuario)"
+                style="background: none; border: none; cursor: pointer"
+                title="Editar"
+              >
+                ✏️
+              </button>
+              <button
+                (click)="borrarUsuario(usuario.id)"
+                style="background: none; border: none; cursor: pointer"
+                title="Eliminar"
+              >
+                🗑️
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

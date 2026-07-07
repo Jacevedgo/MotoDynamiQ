@@ -1,0 +1,133 @@
+<div class="compras-container">
+  <header class="modulo-header">
+    <div class="header-info">
+      <h1>Gestión de Motocicletas</h1>
+      <p>Control de inventario físico, cilindrajes, precios de venta y categorías</p>
+    </div>
+    <button class="btn-nuevo">+ Nueva Motocicleta</button>
+  </header>
+
+  <div class="formulario-compras">
+    <h2>Registrar Nueva Motocicleta</h2>
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="marca">Marca:</label>
+        <input
+          type="text"
+          id="marca"
+          [(ngModel)]="nuevaMoto.marca"
+          placeholder="Ej. BMW, Honda, Yamaha"
+          class="input-form"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="modelo">Modelo / Referencia:</label>
+        <input
+          type="text"
+          id="modelo"
+          [(ngModel)]="nuevaMoto.modelo"
+          placeholder="Ej. G310R, CBR500R"
+          class="input-form"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="categoria">Categoría:</label>
+        <select id="categoria" [(ngModel)]="nuevaMoto.fo_categoria" class="input-form">
+          <option value="" disabled selected>Selecciona una categoría...</option>
+          <option *ngFor="let cat of listaCategorias" [value]="cat.id_categoria">
+            {{ cat.nombre }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="cilindraje">Cilindraje (cc):</label>
+        <input
+          type="number"
+          id="cilindraje"
+          [(ngModel)]="nuevaMoto.cilindraje"
+          placeholder="Ej. 310"
+          class="input-form"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="precio">Precio de Venta ($):</label>
+        <input
+          type="number"
+          id="precio"
+          [(ngModel)]="nuevaMoto.precio"
+          placeholder="Ej. 25000000"
+          class="input-form"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="stock">Stock Inicial:</label>
+        <input
+          type="number"
+          id="stock"
+          [(ngModel)]="nuevaMoto.stock"
+          placeholder="0"
+          class="input-form"
+        />
+      </div>
+    </div>
+    <button
+      class="btn-guardar"
+      (click)="nuevaMoto.id ? actualizarMotocicleta(nuevaMoto.id) : crearMotocicleta()"
+    >
+      💾 {{ nuevaMoto.id ? 'Actualizar' : 'Guardar' }} Motocicleta
+    </button>
+  </div>
+
+  <div class="search-bar">
+    <input type="text" placeholder="Buscar por marca o modelo..." class="input-search" />
+  </div>
+
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Marca</th>
+          <th>Modelo</th>
+          <th>Categoría</th>
+          <th>Cilindraje</th>
+          <th>Precio</th>
+          <th>Stock</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let moto of listaMotos">
+          <td>{{ moto.id }}</td>
+          <td style="font-weight: 600; color: #ffffff">{{ moto.marca }}</td>
+          <td>{{ moto.modelo }}</td>
+          <td>
+            <span class="badge-categoria">{{ moto.categoria }}</span>
+          </td>
+          <td>{{ moto.cilindraje }} cc</td>
+          <td style="color: #10b981; font-weight: 600">$ {{ moto.precio | number }}</td>
+          <td style="font-weight: 600">{{ moto.stock }}</td>
+          <td>
+            <span [class]="moto.stock > 0 ? 'badge-estado disponible' : 'badge-estado agotado'">
+              {{ moto.stock > 0 ? 'Disponible' : 'Agotado' }}
+            </span>
+          </td>
+          <td>
+            <div class="actions-wrapper">
+              <button class="btn-accion" (click)="seleccionarMoto(moto)" title="Editar">✏️</button>
+              <button class="btn-accion delete-icon" (click)="borrarMoto(moto.id)" title="Eliminar">
+                🗑️
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

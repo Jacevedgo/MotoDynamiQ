@@ -6,7 +6,8 @@ import { Injectable } from '@angular/core';
 })
 export class ProveedoresService {
   // Nombre corregido
-  private url = 'http://localhost/motodynamiq/backend/controladores/proveedores.php';
+  // private url = 'http://localhost/motodynamiq/backend/controladores/proveedores.php';
+  url = 'https://motodynamiq.store/backend/controladores/proveedores.php';
 
   constructor(private http: HttpClient) {}
 

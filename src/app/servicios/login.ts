@@ -3,7 +3,8 @@ import { Injectable } from '@angular/core';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  url = 'http://localhost/motodynamiq/backend/controladores/login.php';
+  // url = 'http://localhost/motodynamiq/backend/controladores/login.php';
+  url = 'https://motodynamiq.store/backend/controladores/login.php';
 
   constructor(private http: HttpClient) {}
 

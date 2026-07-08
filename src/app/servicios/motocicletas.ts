@@ -5,7 +5,8 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class Motocicletas {
-  url = 'http://localhost/motodynamiq/backend/controladores/motocicletas.php';
+  // url = 'http://localhost/motodynamiq/backend/controladores/motocicletas.php';
+  url = 'https://motodynamiq.store/backend/controladores/motocicletas.php';
 
   constructor(private http: HttpClient) {}
 
